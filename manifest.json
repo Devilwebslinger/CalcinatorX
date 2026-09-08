@@ -1,7 +1,7 @@
 {
   "name": "Naini Calcinator",
   "short_name": "Naini Calcinator",
-  "start_url": "./Naini_Calcinator_with_icon.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#080a0f",
   "theme_color": "#080a0f",
