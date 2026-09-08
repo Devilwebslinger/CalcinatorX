@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080a0f">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Naini Calcinator</title>
+<style>
+:root{
+ --bg:#f4f6f8;--panel:#ffffff;--panel2:#eef1f4;--line:#d7dde5;--text:#10141b;--muted:#667181;
+ --accent:#1976ff;--accentText:#ffffff;--danger:#ef3340;--display:#cfe9ff;--displayText:#08121d;
+ --num:#e7eaee;--numText:#11151b;--op:#1976ff;--opText:#fff;--memory:#ff9f18;--memoryText:#15100a;
+ --eq:#ffd21c;--eqText:#241d00;--positive:#20bf55;--positiveText:#fff;--clear:#ff3945;--clearText:#fff;--smartDec:#00a7a0;--smartGst:#8b5cf6;--smartBracket:#f59e0b;--smartText:#fff;
+}
+:root[data-theme="dark"]{
+ --bg:#070a0f;--panel:#10151d;--panel2:#171d27;--line:#293240;--text:#f5f7fb;--muted:#919bab;
+ --accent:#2b8cff;--accentText:#fff;--danger:#ff6975;--display:#12263b;--displayText:#f8fbff;
+ --num:#252c37;--numText:#f7f9fc;--op:#168cff;--opText:#fff;--memory:#ff9d16;--memoryText:#fff;
+ --eq:#ffd21c;--eqText:#241d00;--positive:#19c95a;--positiveText:#fff;--clear:#ff3d4d;--clearText:#fff;--smartDec:#12b8b0;--smartGst:#9b6cff;--smartBracket:#ffad24;--smartText:#fff;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{overscroll-behavior:none}
+.app{width:min(100%,430px);min-height:100vh;min-height:100dvh;margin:auto;background:#0a0d12;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.top{height:64px;padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;display:flex;align-items:center;gap:10px;background:#0a0d12;position:sticky;top:0;z-index:20;border-bottom:1px solid #151a23}
+.menu{width:44px;height:44px;border:0;background:transparent;color:#fff;border-radius:12px;font-size:27px;display:grid;place-items:center}
+.menu:active{background:#171c26}
+.logo{font-size:20px;font-weight:850;letter-spacing:.2px}.logo span{color:#1976ff}.themeBtn{width:42px;height:42px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;font-size:18px;display:grid;place-items:center}.themeIcon{position:relative;display:block;width:20px;height:20px}.themeIcon.sun{border:2px solid currentColor;border-radius:50%}.themeIcon.sun:before,.themeIcon.sun:after{content:"";position:absolute;inset:-5px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;border-radius:50%}.themeIcon.sun:after{transform:rotate(90deg)}.themeIcon.moon{border-radius:50%;background:currentColor;width:18px;height:18px}.themeIcon.moon:after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:var(--panel2);left:6px;top:-3px}.offline{margin-left:auto;font-size:10px;color:#788294;border:1px solid #252c39;padding:5px 8px;border-radius:20px}
+body{background:var(--bg)}main{padding:12px 14px 0;flex:1;display:flex;flex-direction:column;min-height:0}.top{background:var(--bg);border-bottom-color:var(--line)}
+.page{display:none}.page.active{display:block;flex:1;min-height:100%;width:100%;background:var(--bg)}
+.display{background:var(--display);color:var(--displayText);border:2px solid var(--line);border-radius:26px;padding:24px 20px 18px;height:202px;text-align:right;margin-bottom:18px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -2px 8px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:flex-end}
+.expression{min-height:28px;height:auto;max-height:34px;color:var(--muted);font-size:16px;line-height:1.25;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:right;font-weight:600;opacity:.9}
+.answer{font-size:84px;font-weight:900;line-height:1.04;overflow:hidden;white-space:normal;overflow-wrap:anywhere;word-break:break-all;color:var(--displayText);letter-spacing:-1px;max-height:none;display:block}
+
+.answer.shortValue{font-size:84px!important}
+.keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,78px);column-gap:12px;row-gap:10px}.key{height:78px;border:0;border-radius:20px;background:var(--num);color:var(--numText);font-size:27px;font-weight:850;touch-action:manipulation;box-shadow:0 4px 0 rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.45);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.key:active{transform:translateY(3px) scale(.985);box-shadow:0 1px 0 rgba(0,0,0,.12)}
+.key.op{background:#ffd21c;color:#241d00;border-color:#e1b900}.key.powerKey{background:var(--positive);color:#fff;border-color:transparent}.key.powerKey.off{background:var(--clear);color:#fff}.key.backKey{background:#ef3340;color:#fff;border-color:transparent}.key.eq{background:#1976ff;color:#fff;border-color:#1264d8;font-size:32px;width:82px;height:82px;border-radius:50%;align-self:center;justify-self:end;z-index:2}.key.memory{background:var(--memory);color:var(--memoryText);border-color:transparent}.key.ac{background:var(--clear);color:var(--clearText);border-color:transparent}.key.smartDec{background:#16b8b5;color:#fff;border-color:transparent}.key.smartPercent{background:var(--smartDec);color:var(--smartText);border-color:transparent}.key.smartGst{background:var(--smartGst);color:var(--smartText);border-color:transparent}.key.smartBracket{background:var(--smartBracket);color:var(--smartText);border-color:transparent}.key.smartReplay{background:#3b82f6;color:#fff;border-color:transparent}
+.drawer{position:fixed;inset:0;z-index:50;pointer-events:none}.drawer.open{pointer-events:auto}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:.2s}.drawer.open .scrim{opacity:1}
+.panel{position:absolute;left:0;top:0;bottom:0;width:min(310px,82vw);background:var(--panel);border-right:1px solid #252c39;padding:calc(env(safe-area-inset-top) + 14px) 14px 20px;transform:translateX(-100%);transition:.24s ease;box-shadow:20px 0 60px #0008}
+.drawer.open .panel{transform:none}
+.panelHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.panelHead b{font-size:20px}.close{background:#171c26;border:0;color:#fff;border-radius:10px;width:38px;height:38px;font-size:22px}
+.option{width:100%;display:flex;align-items:center;gap:12px;background:transparent;border:0;color:var(--text);padding:14px 12px;border-radius:13px;text-align:left;font-weight:700;font-size:14px}
+.option:active,.option.active{background:var(--panel2)}.icon{width:25px;text-align:center;color:#9aaeff}
+.card{background:var(--panel);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.06);border-radius:18px;padding:14px;margin-bottom:12px}
+.title{font-weight:800;font-size:15px;margin-bottom:12px}.muted{font-size:11px;color:var(--muted)}
+.seg{display:flex;gap:5px;padding:5px;background:#080b10;border-radius:13px;margin-bottom:12px}
+.seg button{flex:1;border:0;border-radius:9px;background:transparent;color:#8f99aa;padding:9px 5px;font-size:10px;font-weight:800}
+.seg button.active{background:#e9edf4;color:#090b10}
+.dateModes{display:flex;gap:5px;padding:5px;background:#080b10;border-radius:13px;margin-bottom:12px}.dateModes button{flex:1;border:0;border-radius:9px;background:transparent;color:#8f99aa;padding:9px 5px;font-size:10px;font-weight:800}.dateModes button.active{background:#e9edf4;color:#090b10}.datePick{display:flex;gap:7px;align-items:center}.datePick input{flex:1}.calOpen{width:46px;min-width:46px;height:46px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);font-size:21px;cursor:pointer}.calendarPopup{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,360px);z-index:250;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 20px 60px #0009;display:none}.calendarPopup.open{display:block}.calHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.calHead b{font-size:16px}.calJump{display:flex;gap:5px;align-items:center}.calJump select{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:9px;padding:7px 8px;font-weight:800;font-size:12px;max-width:125px}.calNav{border:0;background:var(--panel2);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:20px}.calWeek,.calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calWeek span{text-align:center;color:var(--muted);font-size:10px;font-weight:800;padding:5px 0}.calDay{border:0;background:var(--panel2);color:var(--text);height:40px;border-radius:10px;font-size:13px}.calDay.mutedDay{opacity:.35}.calDay.today{outline:2px solid var(--accent)}.calDay.selected{background:var(--accent);color:#fff}.calDay.weekendRed{color:#e53935;font-weight:850;background:#fff0f0}.calDay.specialPurple{background:#8b5cf6;color:#fff;font-weight:900}.calDay.specialPurple.selected{background:#8b5cf6;color:#fff}.calClose{width:100%;border:0;background:var(--accent);color:#fff;border-radius:11px;padding:10px;margin-top:12px;font-weight:800}.calendarShade{position:fixed;inset:0;background:#0007;z-index:240;display:none}.calendarShade.open{display:block}.dateMini{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}.dateMiniTitle{font-weight:850;font-size:15px;margin-bottom:9px}.dateMiniHead{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:8px}.dateMiniNav{border:0;background:var(--panel);color:var(--text);width:36px;height:34px;border-radius:9px;font-size:19px;font-weight:800}.dateMiniJump{display:flex;gap:5px;flex:1;justify-content:center}.dateMiniJump select{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:6px 7px;font-weight:800;font-size:11px;max-width:125px}.dateMiniWeek,.dateMiniGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dateMiniWeek span{text-align:center;color:var(--muted);font-size:9px;font-weight:850;padding:3px 0}.dateMiniDay{border:0;background:var(--panel);color:var(--text);height:34px;border-radius:8px;font-size:12px}.dateMiniDay.muted{opacity:.3}.dateMiniDay.weekendRed{color:#e53935;font-weight:900;background:#fff0f0}.dateMiniDay.specialPurple{background:#8b5cf6;color:#fff;font-weight:900}.dateMiniDay.today{outline:2px solid var(--accent)}.dateMiniDay.resultDate{box-shadow:inset 0 0 0 3px #8b5cf6;font-weight:900}.dateMiniDay.resultDate.weekendRed{color:#8b5cf6;background:#f1eaff}.dateMiniDay.resultDate.specialPurple{box-shadow:inset 0 0 0 3px #8b5cf6;background:#8b5cf6;color:#fff}.dateMiniLegend{font-size:10px;color:var(--muted);margin-top:8px;text-align:center}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin-bottom:10px}.field label{display:block;color:#9aa4b4;font-size:10px;margin-bottom:5px}
+input,select{width:100%;background:#080b10;color:#fff;border:1px solid #293140;border-radius:11px;padding:11px;font-size:14px;outline:0}
+.action{width:100%;border:0;background:#e9edf4;color:#090b10;border-radius:12px;padding:12px;font-weight:800}
+.result{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.metric{background:#090c11;border-radius:12px;padding:10px}.metric span{display:block;color:#8792a4;font-size:10px}.metric b{display:block;margin-top:4px;font-size:14px}
+.history{max-height:420px;overflow:auto}.hist{display:flex;justify-content:space-between;gap:8px;padding:11px 0;border-bottom:1px solid #222936;font-size:12px}.hist small{color:#7f899a;display:block;margin-top:3px}.x{background:none;border:0;color:var(--danger);font-size:20px}
+canvas{width:100%;height:170px;background:#080b10;border-radius:14px;margin-top:12px}.hide{display:none!important}
+
+.loanShareModal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px}
+.loanShareModal.open{display:flex}
+.loanShareBox{width:min(100%,430px);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 20px 60px #0008}
+.loanShareTitle{text-align:center;font-size:18px;font-weight:850;margin:2px 0 10px;color:var(--text)}
+.loanShareBox img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);user-select:none;-webkit-user-select:none}
+.loanShareHint{text-align:center;color:var(--muted);font-size:12px;line-height:1.4;padding:10px 4px 4px}
+.loanShareActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.loanShareAction,.loanShareClose{width:100%;border:0;border-radius:12px;padding:12px;font-weight:850;font-size:13px}
+.loanShareAction{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.loanShareAction.primary,.loanShareClose{background:var(--accent);color:#fff}
+.loanShareClose{margin-top:8px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,20px);opacity:0;background:#eef2f7;color:#080a0e;padding:10px 14px;border-radius:11px;font-size:12px;font-weight:700;z-index:100;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:350px){.display{height:175px}.key{height:64px;font-size:22px;border-radius:16px}.key.eq{width:70px;height:70px;font-size:26px}.answer{font-size:72px;max-height:125px}.logo{font-size:18px}.offline{display:none}.top{padding-left:9px;padding-right:9px}main{padding-left:9px;padding-right:9px}.keys{gap:7px}.bottomItem{font-size:9px}.bottomIcon{font-size:21px}}
+
+.bottomNav{display:grid;flex-shrink:0;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--panel);padding:10px 4px calc(10px + env(safe-area-inset-bottom));position:sticky;bottom:0;z-index:15}
+.bottomItem{border:0;background:transparent;color:var(--muted);font-size:10px;font-weight:750;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;min-height:52px}
+.bottomItem.active{color:var(--accent)}
+.bottomIcon{font-size:23px;line-height:22px}
+.bottomItem span:last-child{white-space:nowrap}
+
+
+.loanHeader{margin:2px 0 12px}.loanHeader h2{font-size:25px;margin:4px 2px 16px;font-weight:850}
+.loanTabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line);margin:0 -14px;padding:0 8px}
+.loanTab{border:0;background:transparent;color:var(--muted);font-size:14px;font-weight:850;padding:14px 4px 12px;border-bottom:3px solid transparent}
+.loanTab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.loanPane{display:none}.loanPane.active{display:block}
+.loanCard{padding:18px}.loanModeTitle{text-align:center;font-size:25px;font-weight:850;margin:2px 0 18px}
+.loanActions{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-top:8px}.secondaryAction{border:1px solid var(--line);background:transparent;color:var(--accent);border-radius:12px;padding:12px;font-weight:850}
+.reportGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.reportRow{background:var(--panel2);border-radius:12px;padding:11px}.reportRow span{display:block;color:var(--muted);font-size:10px}.reportRow b{display:block;margin-top:4px;font-size:14px}
+.reportEmpty{color:var(--muted);font-size:13px;padding:10px 0}.graphCaption{padding:8px 2px 0}
+.savedLoans{margin-top:14px}.savedLoan{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:16px;margin-top:10px;text-align:center}
+.savedLoan h3{margin:0 0 12px;font-size:21px}.savedLoan p{margin:7px 0;color:var(--muted);font-size:13px}.savedLoan strong{color:var(--text)}
+.savedBtns{display:flex;justify-content:center;gap:24px;margin-top:14px}.savedBtns button{border:0;background:transparent;color:var(--accent);font-weight:850;font-size:13px}
+@media(max-width:350px){.loanTabs{margin:0 -9px}.loanTab{font-size:11px}.loanModeTitle{font-size:22px}}
+
+
+#amortSection{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);width:100%;max-width:100%;overflow:hidden}.amortTitle{font-size:20px;font-weight:850;line-height:1.2;margin:0 0 10px;padding:0 2px;color:var(--text)}.amortScroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;max-height:360px;overscroll-behavior-x:contain}.amortTable{width:100%;border-collapse:collapse;min-width:510px;font-size:11px}.amortTable th,.amortTable td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.amortTable th:first-child,.amortTable td:first-child{text-align:center}.amortTable th{position:sticky;top:0;z-index:2;background:var(--panel2);color:var(--muted)}
+/* DATE PAGE - COMPACT CONTENT / REDUCED EMPTY AREA */
+#date.page.active{display:flex;flex-direction:column;flex:1;min-height:0}
+#date.page.active .card{margin-bottom:0}
+#date.page.active .title{margin-bottom:10px}
+#date.page.active .seg{margin-bottom:10px}
+#date.page.active .field{margin-bottom:8px}
+#date.page.active .action{margin-top:2px}
+#date.page.active #dateRes{margin-top:10px}
+@media (min-height:700px) and (orientation:portrait){
+  #date.page.active .card{max-width:100%;}
+}
+
+@media(max-width:430px){.loanCard{padding:12px}.loanCard .grid{grid-template-columns:1fr 1fr;gap:8px}.loanRes,.result{min-width:0}.amortTitle{font-size:18px}.amortScroll{border-radius:10px}.amortTable{min-width:500px;font-size:10.5px}.amortTable th,.amortTable td{padding:8px 7px}}
+@media(max-width:360px){.loanCard .grid{grid-template-columns:1fr}.loanActions{grid-template-columns:1fr 1fr}.amortTable{min-width:500px}}
+
+/* LANDSCAPE / APK PHONE LAYOUT */
+@media (orientation:landscape) and (min-width:600px){
+  html,body{width:100%;min-height:100%;overflow-x:hidden}
+  .app{width:100%;max-width:none;min-height:100vh;min-height:100dvh}
+  .top{height:58px;padding:7px 18px;gap:12px}
+  .menu{width:42px;height:42px}
+  .logo{font-size:22px}
+  main{padding:10px 18px 0;overflow-y:auto;overflow-x:hidden}
+  .page.active{max-width:1200px;margin:0 auto}
+  .display{height:126px;padding:14px 18px 12px;margin-bottom:10px;border-radius:18px}
+  .answer{font-size:64px;max-height:92px;line-height:1.0}
+  .keys{grid-template-rows:repeat(5,54px);gap:7px}
+  .key{height:54px;font-size:21px;border-radius:14px}.key.eq{width:58px;height:58px;font-size:24px}
+  .bottomNav{padding:5px 10px calc(5px + env(safe-area-inset-bottom));position:sticky}
+  .bottomItem{min-height:46px;padding:3px 4px;font-size:10px}
+  .bottomIcon{font-size:20px;line-height:19px}
+  .loanHeader h2{font-size:28px;margin:2px 2px 10px;text-align:center}
+  .loanTabs{margin:0;padding:0 18px}
+  .loanTab{padding:10px 4px 9px}
+  .loanCard{padding:14px 18px}
+  .loanModeTitle{font-size:22px;margin:0 0 12px}
+  .loanCard .grid{grid-template-columns:1fr 1fr;gap:10px}
+  .field{margin-bottom:8px}
+  .loanActions{grid-template-columns:1fr 1fr;gap:10px}
+  .result{grid-template-columns:repeat(4,1fr);gap:8px}
+  .metric{padding:9px}
+  #amortSection{margin-top:12px;padding-top:10px}
+  .amortTitle{font-size:20px;margin-bottom:8px}
+  .amortScroll{max-height:190px}
+  .amortTable{min-width:760px;font-size:11px}
+  .amortTable th,.amortTable td{padding:7px 8px}
+  .loanShareModal{padding:8px}
+  .loanShareBox{width:min(96vw,1100px);max-height:96vh;padding:8px;border-radius:16px}
+  .loanShareTitle{font-size:16px;margin:0 0 6px}
+  .loanShareBox img{max-height:calc(96vh - 58px);object-fit:contain}
+}
+
+
+/* FINAL DAY MODE VISIBILITY FIX */
+:root:not([data-theme="dark"]) html,
+:root:not([data-theme="dark"]) body,
+:root:not([data-theme="dark"]) .app,
+:root:not([data-theme="dark"]) main,
+:root:not([data-theme="dark"]) .page.active{
+  background:#f4f6f8 !important;
+  color:#10141b !important;
+}
+:root:not([data-theme="dark"]) .top{
+  background:#f4f6f8 !important;
+  color:#10141b !important;
+  border-bottom-color:#d7dde5 !important;
+}
+:root:not([data-theme="dark"]) .menu{color:#10141b !important}
+:root:not([data-theme="dark"]) .logo{color:#10141b !important}
+:root:not([data-theme="dark"]) input:not([type="checkbox"]),
+:root:not([data-theme="dark"]) select{
+  background:#ffffff !important;
+  color:#05070a !important;
+  -webkit-text-fill-color:#05070a !important;
+  caret-color:#05070a !important;
+  border:1.5px solid #8e98a5 !important;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.04) !important;
+}
+:root:not([data-theme="dark"]) input::placeholder{
+  color:#697482 !important;
+  -webkit-text-fill-color:#697482 !important;
+}
+:root:not([data-theme="dark"]) .metric{
+  background:#eef2f6 !important;
+  border:1px solid #c7d0da !important;
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .metric span{
+  color:#596473 !important;
+}
+:root:not([data-theme="dark"]) .metric b{
+  color:#05070a !important;
+  -webkit-text-fill-color:#05070a !important;
+  font-weight:900 !important;
+}
+:root:not([data-theme="dark"]) .result .metric,
+:root:not([data-theme="dark"]) .result .metric *{
+  opacity:1 !important;
+  visibility:visible !important;
+}
+:root:not([data-theme="dark"]) .loanCard{
+  background:#ffffff !important;
+  color:#10141b !important;
+  border-color:#cbd3dc !important;
+}
+:root:not([data-theme="dark"]) .loanModeTitle,
+:root:not([data-theme="dark"]) .loanHeader h2{
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .seg{
+  background:#11151b !important;
+}
+:root:not([data-theme="dark"]) .seg button{
+  color:#aeb7c3 !important;
+}
+:root:not([data-theme="dark"]) .seg button.active{
+  background:#e7edf4 !important;
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .action{
+  background:#e7edf4 !important;
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .secondaryAction{
+  color:#075fd6 !important;
+}
+:root:not([data-theme="dark"]) .loanTab{
+  color:#5d6877 !important;
+}
+:root:not([data-theme="dark"]) .loanTab.active{
+  color:#075fd6 !important;
+}
+:root:not([data-theme="dark"]) .field label{
+  color:#5d6877 !important;
+}
+:root:not([data-theme="dark"]) .reportRow{
+  background:#eef2f6 !important;
+  border-color:#c7d0da !important;
+}
+:root:not([data-theme="dark"]) .reportRow span{
+  color:#596473 !important;
+}
+:root:not([data-theme="dark"]) .reportRow b{
+  color:#05070a !important;
+  -webkit-text-fill-color:#05070a !important;
+  font-weight:900 !important;
+}
+:root:not([data-theme="dark"]) .savedLoan{
+  background:#eef2f6 !important;
+  border-color:#c7d0da !important;
+}
+:root:not([data-theme="dark"]) .savedLoan h3,
+:root:not([data-theme="dark"]) .savedLoan strong{
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .savedLoan p{
+  color:#4f5966 !important;
+}
+:root:not([data-theme="dark"]) .amortTable{
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .amortTable th{
+  background:#e2e7ed !important;
+  color:#303944 !important;
+}
+:root:not([data-theme="dark"]) .amortTable td{
+  color:#05070a !important;
+}
+:root:not([data-theme="dark"]) .bottomNav{
+  background:#ffffff !important;
+  border-top-color:#cbd3dc !important;
+}
+:root:not([data-theme="dark"]) .bottomItem{
+  color:#5d6877 !important;
+}
+:root:not([data-theme="dark"]) .bottomItem.active{
+  color:#075fd6 !important;
+}
+
+
+/* FINAL CALCULATOR LOOK — closely matched to the requested reference */
+@media (orientation:portrait){
+  .app{width:min(100%,430px);background:var(--bg)}
+  main{padding:12px 14px 0}
+  .display{height:202px;border-radius:28px;padding:20px 22px 18px;margin-bottom:18px}
+  .expression{font-size:17px;min-height:30px;line-height:1.2}
+  .answer{font-size:84px;line-height:1.0;letter-spacing:-2px;max-height:none}
+  .keys{grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,78px);gap:10px}
+  .key{height:78px;border-radius:20px;font-size:28px;font-weight:850}
+  .key.op{background:#ffc83d;color:#17120a;border-color:#e7ad18}
+  .key.powerKey{background:#20bf55;color:#fff}
+  .key.powerKey.off{background:#ef3340;color:#fff}
+  .key.backKey{background:#ef3340;color:#fff}
+  .key.eq{width:82px;height:82px;border-radius:50%;font-size:32px;background:#1976ff;color:#fff;border-color:#1264d8;justify-self:end;align-self:center}
+  .key.smartPercent,.key.smartDec{background:#10b5b1;color:#fff}
+  .key.smartGst{background:#7c4ce6;color:#fff}
+  .key.smartBracket{background:#f59e0b;color:#fff}
+  .key.smartReplay{background:#347fe8;color:#fff}
+  .key[data-k="pow"]{background:#ffc83d;color:#17120a}
+  .bottomNav{background:var(--panel);border-top-color:var(--line)}
+}
+@media(max-width:350px){
+  .answer{font-size:76px;letter-spacing:-1px}
+  .key.eq{width:76px;height:76px;font-size:30px;background:#1976ff;color:#fff;border-color:#1264d8}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><button class="menu" id="menuBtn" aria-label="Open menu">☰</button><div class="logo">Naini <span>Calcinator</span></div><button class="themeBtn" id="themeBtn" type="button" aria-label="Switch theme"><span id="themeIcon" class="themeIcon sun" aria-hidden="true"></span></button><div class="offline">OFFLINE</div></header>
+
+<div class="drawer" id="drawer">
+<div class="scrim" id="scrim"></div>
+<aside class="panel">
+<div class="panelHead"><b>Naini Calcinator</b><button class="close" id="closeBtn">×</button></div>
+<button class="option active" data-page="calc"><span class="icon">⌗</span>Standard Calculator</button>
+<button class="option" data-page="date"><span class="icon">◷</span>Date Calculator</button>
+<button class="option" data-page="loan"><span class="icon">₹</span>Loan / EMI / Moratorium</button>
+<button class="option" data-page="deposit"><span class="icon">▣</span>FD / RD Calculator</button>
+<button class="option" data-page="sip"><span class="icon">↗</span>SIP Calculator</button>
+<button class="option" data-page="history"><span class="icon">↺</span>History</button>
+</aside></div>
+
+<main>
+<section id="calc" class="page active">
+<div class="display">
+  <div class="expression" id="expr"></div>
+  <div class="answer" id="disp">0</div>
+</div>
+
+<div class="keys">
+  <!-- Row 1: ON/OFF / CE / backspace / x^y / + -->
+  <button class="key powerKey" id="powerKey" data-k="power" aria-label="Calculator power">ON</button>
+  <button class="key" style="background:var(--accent);color:var(--accentText);border-color:transparent" data-k="CE">CE</button>
+  <button class="key backKey" data-k="back" aria-label="Backspace">⌫</button>
+  <button class="key op" data-k="pow">xʸ</button>
+  <button class="key op" data-k="+">+</button>
+
+  <!-- Row 2 -->
+  <button class="key smartPercent" data-k="%">%</button>
+  <button class="key" data-k="7">7</button>
+  <button class="key" data-k="8">8</button>
+  <button class="key" data-k="9">9</button>
+  <button class="key op" data-k="/">÷</button>
+
+  <!-- Row 3 -->
+  <button class="key smartGst" data-k="gst18">GST 18%</button>
+  <button class="key" data-k="4">4</button>
+  <button class="key" data-k="5">5</button>
+  <button class="key" data-k="6">6</button>
+  <button class="key op" data-k="*">×</button>
+
+  <!-- Row 4 -->
+  <button class="key smartBracket" data-k="bracket">()</button>
+  <button class="key" data-k="1">1</button>
+  <button class="key" data-k="2">2</button>
+  <button class="key" data-k="3">3</button>
+  <button class="key op" data-k="-">−</button>
+
+  <!-- Row 5 -->
+  <button class="key smartReplay" data-k="replay" aria-label="Auto replay last calculation">↻</button>
+  <button class="key" data-k="sqrt">√</button>
+  <button class="key" data-k="0">0</button>
+  <button class="key smartDec" data-k=".">.</button>
+  <button class="key eq" data-k="=">=</button>
+</div>
+</section>
+
+<section id="date" class="page">
+<div class="card"><div class="title">Date Calculator</div>
+<div class="seg dateModes" aria-label="Date calculation mode"><button class="active" onclick="setDateMode('diff',this)">DIFFERENCE</button><button onclick="setDateMode('add',this)">ADD</button><button onclick="setDateMode('sub',this)">SUBTRACT</button></div>
+<div class="grid"><div class="field"><label>Start date</label><div class="datePick"><input id="d1" type="date"><button class="calOpen" type="button" onclick="openCalendar('d1')" aria-label="Open start date calendar">▣</button></div></div><div class="field"><label>End date</label><div class="datePick"><input id="d2" type="date"><button class="calOpen" type="button" onclick="openCalendar('d2')" aria-label="Open end date calendar">▣</button></div></div></div>
+<div id="dateAmount" class="grid hide"><div class="field"><label>Value</label><input id="dnum" type="number" value="1" min="0"></div><div class="field"><label>Unit</label><select id="dunit"><option value="d">Days</option><option value="w">Weeks</option><option value="m">Months</option><option value="y">Years</option></select></div></div>
+<button class="action" onclick="calcDate()">Calculate</button><div id="dateRes"></div><div class="dateMini" id="dateMiniCalendar"><div class="dateMiniTitle">Calendar</div><div class="dateMiniHead"><button class="dateMiniNav" type="button" onclick="changeMiniCalendarMonth(-1)">‹</button><div class="dateMiniJump"><select id="miniMonthSelect" aria-label="Calendar month" onchange="jumpMiniCalendarMonth(this.value)"></select><select id="miniYearSelect" aria-label="Calendar year" onchange="jumpMiniCalendarYear(this.value)"></select></div><button class="dateMiniNav" type="button" onclick="changeMiniCalendarMonth(1)">›</button></div><div class="dateMiniWeek"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div id="miniCalGrid" class="dateMiniGrid"></div><div class="dateMiniLegend">Sundays, 2nd &amp; 4th Saturdays red · 13 August purple · calculated result outlined</div></div></div>
+</section>
+
+<div id="calendarShade" class="calendarShade" onclick="closeCalendar()"></div><div id="calendarPopup" class="calendarPopup" role="dialog" aria-modal="true" aria-label="Calendar"><div class="calHead"><button class="calNav" type="button" onclick="changeCalendarMonth(-1)">‹</button><div class="calJump"><select id="calMonthSelect" aria-label="Select month" onchange="jumpCalendarMonth(this.value)"></select><select id="calYearSelect" aria-label="Select year" onchange="jumpCalendarYear(this.value)"></select></div><button class="calNav" type="button" onclick="changeCalendarMonth(1)">›</button></div><div class="calWeek"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div id="calGrid" class="calGrid"></div><button class="calClose" type="button" onclick="closeCalendar()">CLOSE</button></div>
+
+<section id="loan" class="page">
+<div class="loanHeader">
+  <h2>Loan - Basic</h2>
+  <div class="loanTabs" role="tablist" aria-label="Loan sections">
+    <button class="loanTab active" data-loantab="input">INPUT</button>
+    <button class="loanTab" data-loantab="report">REPORT</button>
+    <button class="loanTab" data-loantab="graph">GRAPH</button>
+    <button class="loanTab" data-loantab="save">SAVE</button>
+  </div>
+</div>
+
+<div id="loanInput" class="loanPane active">
+<div class="card loanCard">
+  <div class="loanModeTitle">EMI - Basic</div>
+  <div class="seg">
+    <button class="active" data-loanmode="emi">EMI</button>
+    <button data-loanmode="mor">MORATORIUM</button>
+  </div>
+  <div class="grid">
+    <div class="field"><label>Loan Amount (₹)</label><input id="la" type="number" value="1000000" min="1" step="100"></div>
+    <div class="field"><label>Annual Interest Rate (%)</label><input id="lr" type="number" value="8.5" min="0" step=".01"></div>
+    <div class="field"><label>Loan Term</label><input id="ly" type="number" value="10" min=".01" step=".01"></div>
+    <div class="field"><label>Term Unit</label><select id="loanUnit"><option value="y">Years</option><option value="m">Months</option></select></div>
+  </div>
+
+  <div class="field">
+    <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:12px">
+      <input id="showAmort" type="checkbox" style="width:18px;height:18px;accent-color:var(--accent)">
+      Show amortization schedule
+    </label>
+  </div>
+
+  <div id="morFields" class="morOnly hide">
+    <div class="grid">
+      <div class="field"><label>Moratorium (months)</label><input id="lm" type="number" value="3" min="1" step="1"></div>
+      <div class="field"><label>Interest treatment</label><select id="li"><option value="cap">Capitalize interest</option><option value="pay">Pay interest during moratorium</option></select></div>
+    </div>
+  </div>
+
+  <div class="loanActions">
+    <button class="secondaryAction" id="loanReset" type="button">RESET</button>
+    <button class="action" id="loanCalculate" type="button">CALCULATE</button>
+  </div>
+  <div id="loanRes" aria-live="polite"></div>
+  <div id="amortSection" class="hide">
+    <div class="amortTitle">Amortization Schedule</div>
+    <div class="amortScroll">
+      <table class="amortTable">
+        <thead><tr><th>Month</th><th>Phase</th><th>EMI / Interest Paid</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
+        <tbody id="amortBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="loanReport" class="loanPane">
+<div class="card loanCard">
+  <div class="loanModeTitle">Loan Report</div>
+  <div id="loanReportContent" class="reportEmpty">Calculate a loan to see the full report.</div>
+</div>
+</div>
+
+<div id="loanGraph" class="loanPane">
+<div class="card loanCard">
+  <div class="loanModeTitle">Loan Graph</div>
+  <canvas id="loanChart" width="800" height="340"></canvas>
+  <div class="muted graphCaption">Outstanding principal over the repayment period.</div>
+</div>
+</div>
+
+<div id="loanSave" class="loanPane">
+<div class="card loanCard">
+  <div class="loanModeTitle">Saved Loans</div>
+  <div class="field"><label>Loan name</label><input id="loanName" type="text" maxlength="40" placeholder="e.g. Home Loan"></div>
+  <button class="action" id="saveLoanBtn" type="button">SAVE LOAN</button>
+   <button class="secondaryAction" id="shareLoanBtn" type="button" style="width:100%;margin-top:9px">SHARE LOAN</button>
+  <div id="savedLoans" class="savedLoans"></div>
+</div>
+</div>
+</section>
+
+<section id="deposit" class="page">
+<div class="card"><div class="title">FD / RD Calculator</div>
+<div class="seg"><button class="active" onclick="setDep(false,this)">FD</button><button onclick="setDep(true,this)">RD</button></div>
+<div class="grid"><div class="field"><label id="depLabel">Deposit (₹)</label><input id="da" type="number" value="100000"></div><div class="field"><label>Rate (% p.a.)</label><input id="dr" type="number" value="7" step=".01"></div><div class="field"><label>Term</label><input id="dt" type="number" value="2"></div><div class="field"><label>Term unit</label><select id="du"><option value="y">Years</option><option value="m">Months</option><option value="d">Days</option></select></div></div>
+<div class="field"><label>Compounding</label><select id="dc"><option value="4">Quarterly</option><option value="12">Monthly</option><option value="2">Half-yearly</option><option value="1">Yearly</option></select></div>
+<button class="action" onclick="calcDeposit()">Calculate</button><div id="depRes"></div></div>
+</section>
+
+<section id="sip" class="page">
+<div class="card"><div class="title">SIP Calculator</div>
+<div class="grid"><div class="field"><label>Monthly SIP (₹)</label><input id="sa" type="number" value="10000"></div><div class="field"><label>Expected return (% p.a.)</label><input id="sr" type="number" value="12"></div><div class="field"><label>Term (years)</label><input id="sy" type="number" value="10"></div><div class="field"><label>Step-up</label><select id="st" onchange="toggleStep()"><option value="none">None</option><option value="pct">Percentage / year</option><option value="fixed">Fixed ₹ / year</option></select></div></div>
+<div id="stepBox" class="field hide"><label>Step-up value</label><input id="sv" type="number" value="10"></div>
+<button class="action" onclick="calcSIP()">Calculate</button><div id="sipRes"></div><canvas id="sipChart" width="800" height="340"></canvas></div>
+</section>
+
+<section id="history" class="page"><div class="card"><div class="title">Calculation History</div><button class="action" onclick="clearHistory()">Clear history</button><div id="historyList" class="history"></div></div></section>
+</main>
+<nav class="bottomNav" aria-label="Main navigation">
+  <button class="bottomItem active" data-bottom="calc"><span class="bottomIcon">▦</span><span>Calculator</span></button>
+  <button class="bottomItem" data-bottom="date"><span class="bottomIcon">▣</span><span>Date</span></button>
+  <button class="bottomItem" data-bottom="loan"><span class="bottomIcon">₹</span><span>Loan</span></button>
+  <button class="bottomItem" data-bottom="deposit"><span class="bottomIcon">▥</span><span>Finance</span></button>
+  <button class="bottomItem" data-bottom="history"><span class="bottomIcon">◷</span><span>History</span></button>
+</nav>
+<div id="toast" class="toast"></div>
+<div id="loanShareModal" class="loanShareModal" role="dialog" aria-modal="true" aria-label="Loan summary image">
+  <div class="loanShareBox">
+    <div class="loanShareTitle">Loan Summary — Screenshot &amp; Share</div>
+    <img id="loanShareImage" alt="Naini Calcinator loan summary image">
+    <button id="loanShareClose" class="loanShareClose" type="button">CLOSE</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* Naini Calcinator - APK-friendly single-file app.
+   Uses only HTML/CSS/JS, localStorage and browser vibration/audio APIs.
+   Suitable as a WebView/HTML source for AppsGeyser-style APK wrappers. */
+
+let historyData=JSON.parse(localStorage.getItem('count_craze_history')||'[]');
+let expr='',lastAnswer=0,calcHistory='',replayExpression='',justEvaluated=false,dateMode='diff',loanMode='emi',isRD=false,audioCtx=null;
+
+const $=id=>document.getElementById(id);
+const money=n=>'₹ '+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const valid=n=>Number.isFinite(n)&&n>=0;
+
+function feedback(kind='tap'){
+ try{if(navigator.vibrate) navigator.vibrate(kind==='equal'?[18,12,25]:kind==='error'?[35,20,35]:12)}catch(e){}
+ try{
+   audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+   if(audioCtx.state==='suspended') audioCtx.resume();
+   const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+   o.frequency.value=kind==='equal'?520:kind==='error'?150:390;
+   o.type='sine';g.gain.setValueAtTime(.035,audioCtx.currentTime);
+   g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.055);
+   o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.06);
+ }catch(e){}
+}
+document.addEventListener('pointerdown',e=>{if(e.target.closest('button')) feedback()}, {passive:true});
+
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1500)}
+function openDrawer(){ $('drawer').classList.add('open') }
+function closeDrawer(){ $('drawer').classList.remove('open') }
+$('menuBtn').onclick=openDrawer;$('closeBtn').onclick=closeDrawer;$('scrim').onclick=closeDrawer;
+
+document.querySelectorAll('.option').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.option').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+ document.querySelectorAll('.bottomItem').forEach(x=>x.classList.toggle('active',x.dataset.bottom===b.dataset.page));
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(b.dataset.page).classList.add('active');closeDrawer();renderHistory();
+});
+
+function fitCalcDisplay(){
+ const el=$('disp');if(!el)return;
+ const text=String(el.textContent||'0');
+ const width=el.clientWidth||300;
+ const available=132; // space below the small history line
+ let size=84;
+ el.classList.toggle('shortValue',text.length<=6);
+ el.style.overflow='visible';
+ el.style.maxHeight='none';
+ el.style.paddingBottom='0';
+ el.style.whiteSpace=justEvaluated?'nowrap':'normal';
+ el.style.wordBreak=justEvaluated?'normal':'break-word';
+ el.style.overflowWrap=justEvaluated?'normal':'break-word';
+ el.style.lineHeight='1.02';
+ el.style.fontSize=size+'px';
+
+ // Completed results: keep them on one line and only reduce enough to fit.
+ if(justEvaluated){
+   while(el.scrollWidth>width && size>34){
+     size-=2;el.style.fontSize=size+'px';
+   }
+   return;
+ }
+
+ // While typing, keep the expression large, but make sure every wrapped line
+ // fits inside the display.  Measure actual line boxes rather than relying on
+ // scrollHeight/max-height (which can report the clipped height in WebViews).
+ const lineCount=()=>{
+   const range=document.createRange();
+   range.selectNodeContents(el);
+   const rects=[...range.getClientRects()];
+   const ys=[];
+   for(const r of rects){
+     if(r.width>0&&r.height>0 && !ys.some(y=>Math.abs(y-r.top)<2)) ys.push(r.top);
+   }
+   range.detach?.();
+   return Math.max(1,ys.length);
+ };
+
+ while(size>28){
+   el.style.fontSize=size+'px';
+   const lines=lineCount();
+   const height=lines*size*1.02;
+   if(lines<=4 && height<=available && el.scrollWidth<=width+2) break;
+   // If it wraps, the line count is the important constraint.  If it is one
+   // line but too wide, reduce until it fits.  This prevents clipped last digits.
+   if(lines<=4 && height<=available && el.scrollWidth>width+2){
+     size-=2;continue;
+   }
+   size-=2;
+ }
+ el.style.fontSize=size+'px';
+ // Never clip the bottom of the final line.
+ el.style.maxHeight=available+'px';
+ el.style.overflow='hidden';
+}
+
+function showCalc(){
+ const el=$('disp'),hist=$('expr');
+ if(!el)return;
+ el.textContent=expr||'0';
+ if(hist)hist.textContent=calcHistory||'';
+ // History stays on the small line above until CE; the current answer/value
+ // always starts at the largest readable size and only shrinks when needed.
+ fitCalcDisplay();
+}
+function calcKey(k){
+ if(k==='AC'){expr='';calcHistory='';justEvaluated=false;showCalc();return}
+ if(k==='back'){if(justEvaluated)justEvaluated=false;expr=expr.slice(0,-1);showCalc();return}
+ if(k==='%'){
+  try{
+   if(!expr) return;
+   const m=expr.match(/(.*?)([-+*/])([0-9]*\.?[0-9]+)$/);
+   if(m){
+    const left=m[1],op=m[2],num=Number(m[3]);
+    if(op==='*'||op==='/'){
+      expr=left+op+String(num/100);
+    }else if(op==='+'||op==='-'){
+      const base=Number(Function('"use strict";return ('+left+')')());
+      if(!Number.isFinite(base))throw Error();
+      expr=left+op+String(base*num/100);
+    }
+   }else{
+    expr=String(Number(expr)/100);
+   }
+  }catch(e){expr='Error'}
+  showCalc();return
+ }
+ if(k==='ans'){expr+=String(lastAnswer);showCalc();return}
+ if(k==='='){
+  try{
+   let safe=expr.replace(/×/g,'*').replace(/÷/g,'/').replace(/\^/g,'**');
+   if(!/^[0-9+\-*/().\s]+$/.test(safe))throw Error();
+   let result=Function('"use strict";return ('+safe+')')();
+   if(!Number.isFinite(result))throw Error();
+   lastAnswer=result;
+   replayExpression=expr;
+   const shownResult=String(Number(result.toFixed(10)));
+   calcHistory=expr+' = '+shownResult;
+   saveHistory('Calculator',calcHistory);
+   expr=shownResult;
+   justEvaluated=true;
+   showCalc();feedback('equal');
+  }catch(e){expr='Error';justEvaluated=false;showCalc();feedback('error');setTimeout(()=>{expr='';showCalc()},800)}
+  return
+ }
+ if(expr==='Error'){expr='';justEvaluated=false}
+ if(justEvaluated && (/^[0-9.]$/.test(k)||k==='ans')){expr='';justEvaluated=false}
+ if(k==='.'&&expr.split(/[+\-*/]/).pop().includes('.'))return;
+ expr+=k;showCalc();
+}
+document.querySelectorAll('.key').forEach(b=>b.onclick=()=>calcKey(b.dataset.k));
+document.addEventListener('keydown',e=>{let k=e.key;if(/[0-9.+\-*/]/.test(k))calcKey(k);else if(k==='Enter')calcKey('=');else if(k==='Backspace')calcKey('back');else if(k==='%')calcKey('%')});
+
+function saveHistory(type,text){historyData.unshift({type,text,time:new Date().toLocaleString('en-IN')});historyData=historyData.slice(0,60);localStorage.setItem('count_craze_history',JSON.stringify(historyData));renderHistory()}
+function renderHistory(){$('historyList').innerHTML=historyData.length?historyData.map((h,i)=>`<div class="hist"><div><b>${h.type}</b><div>${h.text}</div><small>${h.time}</small></div><button class="x" onclick="deleteHistory(${i})">×</button></div>`).join(''):'<div class="muted" style="padding:16px 0">No calculations yet.</div>'}
+function deleteHistory(i){historyData.splice(i,1);localStorage.setItem('count_craze_history',JSON.stringify(historyData));renderHistory()}
+function clearHistory(){historyData=[];localStorage.removeItem('count_craze_history');renderHistory();toast('History cleared')}
+
+let calendarTarget='d1',calendarView=new Date();
+function pad2(n){return String(n).padStart(2,'0')}
+function isoFromParts(y,m,d){return y+'-'+pad2(m+1)+'-'+pad2(d)}
+function renderCalendar(){
+ const y=calendarView.getFullYear(),m=calendarView.getMonth();
+ const monthSel=$('calMonthSelect'),yearSel=$('calYearSelect');
+ if(monthSel){monthSel.innerHTML=Array.from({length:12},(_,i)=>`<option value="${i}" ${i===m?'selected':''}>${new Date(2000,i,1).toLocaleDateString('en-IN',{month:'long'})}</option>`).join('')}
+ if(yearSel){const cy=new Date().getFullYear();const min=1900,max=2100;yearSel.innerHTML=Array.from({length:max-min+1},(_,i)=>{const yr=min+i;return `<option value="${yr}" ${yr===y?'selected':''}>${yr}</option>`}).join('')}
+ const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
+ const target=$(calendarTarget).value; let html='';
+ for(let i=0;i<42;i++){
+  let day=i-first+1,yy=y,mm=m,muted=false;
+  if(day<1){day=prevDays+day;mm=m-1;muted=true} else if(day>days){day=day-days;mm=m+1;muted=true}
+  if(mm<0){mm=11;yy--} if(mm>11){mm=0;yy++}
+  const iso=isoFromParts(yy,mm,day);
+  const now=new Date(),today=isoFromParts(now.getFullYear(),now.getMonth(),now.getDate());
+  const dow=new Date(yy,mm,day).getDay();
+  const saturdayNumber=dow===6?Math.ceil(day/7):0;
+  const isRedDay=dow===0 || (dow===6 && (saturdayNumber===2 || saturdayNumber===4));
+  const isPurpleDay=mm===7 && day===13;
+  const dayClass=`calDay${muted?' mutedDay':''}${iso===today?' today':''}${iso===target?' selected':''}${isRedDay?' weekendRed':''}${isPurpleDay?' specialPurple':''}`;
+  html+=`<button type="button" class="${dayClass}" onclick="pickCalendarDate('${iso}')">${day}</button>`;
+ }
+ $('calGrid').innerHTML=html;
+}
+function openCalendar(id){calendarTarget=id;const v=$(id).value;calendarView=v?new Date(v+'T00:00:00'):new Date();renderCalendar();$('calendarShade').classList.add('open');$('calendarPopup').classList.add('open')}
+function closeCalendar(){$('calendarShade').classList.remove('open');$('calendarPopup').classList.remove('open')}
+function changeCalendarMonth(n){calendarView.setMonth(calendarView.getMonth()+n);renderCalendar()}
+function jumpCalendarMonth(v){calendarView.setMonth(Number(v));renderCalendar()}
+function jumpCalendarYear(v){calendarView.setFullYear(Number(v));renderCalendar()}
+function pickCalendarDate(iso){$(calendarTarget).value=iso;$(calendarTarget).dispatchEvent(new Event('change'));closeCalendar()}
+
+let miniCalendarView=new Date();
+let miniResultISO='';
+function renderMiniCalendar(){
+ const y=miniCalendarView.getFullYear(),m=miniCalendarView.getMonth();
+ const ms=$('miniMonthSelect'),ys=$('miniYearSelect');
+ if(ms)ms.innerHTML=Array.from({length:12},(_,i)=>`<option value="${i}" ${i===m?'selected':''}>${new Date(2000,i,1).toLocaleDateString('en-IN',{month:'short'})}</option>`).join('');
+ if(ys){const min=1900,max=2100;ys.innerHTML=Array.from({length:max-min+1},(_,i)=>{const yr=min+i;return `<option value="${yr}" ${yr===y?'selected':''}>${yr}</option>`}).join('')}
+ const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate();
+ let html='';
+ for(let i=0;i<42;i++){
+  let day=i-first+1,yy=y,mm=m,muted=false;
+  if(day<1){day=prevDays+day;mm=m-1;muted=true}else if(day>days){day=day-days;mm=m+1;muted=true}
+  if(mm<0){mm=11;yy--}if(mm>11){mm=0;yy++}
+  const iso=isoFromParts(yy,mm,day),d=new Date(yy,mm,day),dow=d.getDay();
+  const saturdayNumber=dow===6?Math.ceil(day/7):0;
+  const isRedDay=dow===0||(dow===6&&(saturdayNumber===2||saturdayNumber===4));
+  const isPurpleDay=mm===7&&day===13;
+  const cls=`dateMiniDay${muted?' muted':''}${iso===todayISO()?' today':''}${isRedDay?' weekendRed':''}${isPurpleDay?' specialPurple':''}${iso===miniResultISO?' resultDate':''}`;
+  html+=`<button type="button" class="${cls}" onclick="selectMiniCalendarDate('${iso}')">${day}</button>`;
+ }
+ $('miniCalGrid').innerHTML=html;
+}
+function initMiniCalendar(){
+ const v=$('d1')?.value; miniCalendarView=v?new Date(v+'T00:00:00'):new Date(); renderMiniCalendar();
+}
+function changeMiniCalendarMonth(n){miniCalendarView.setMonth(miniCalendarView.getMonth()+n);renderMiniCalendar()}
+function jumpMiniCalendarMonth(v){miniCalendarView.setMonth(Number(v));renderMiniCalendar()}
+function jumpMiniCalendarYear(v){miniCalendarView.setFullYear(Number(v));renderMiniCalendar()}
+function selectMiniCalendarDate(iso){$('d1').value=iso;renderMiniCalendar();}
+function todayISO(){let d=new Date();return d.toISOString().slice(0,10)}
+$('d1').value=todayISO();$('d2').value=todayISO();initMiniCalendar();
+
+function setDateMode(m,b){dateMode=m;document.querySelectorAll('#date .seg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('dateAmount').classList.toggle('hide',m==='diff')}
+function calcDate(){
+ let a=new Date($('d1').value+'T00:00:00'),b=new Date($('d2').value+'T00:00:00');
+ if(isNaN(a)||isNaN(b)){toast('Choose valid dates');return}
+ if(dateMode==='diff'){
+  let days=Math.round((b-a)/86400000),abs=Math.abs(days);
+  miniResultISO=$('d1').value; miniCalendarView=new Date($('d1').value+'T00:00:00'); renderMiniCalendar();
+  $('dateRes').innerHTML=`<div class="result"><div class="metric"><span>Difference</span><b>${abs.toLocaleString('en-IN')} days</b></div><div class="metric"><span>Approx.</span><b>${Math.floor(abs/7)} weeks</b></div></div>`;
+  saveHistory('Date Difference',abs+' days');
+ }else{
+  let base=a,v=Number($('dnum').value),u=$('dunit').value;if(!valid(v)){toast('Enter a valid value');return}if(dateMode==='sub')v=-v;
+  if(u==='d')base.setDate(base.getDate()+v);else if(u==='w')base.setDate(base.getDate()+v*7);else if(u==='m')base.setMonth(base.getMonth()+v);else base.setFullYear(base.getFullYear()+v);
+  let out=base.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  miniResultISO=isoFromParts(base.getFullYear(),base.getMonth(),base.getDate()); miniCalendarView=new Date(miniResultISO+'T00:00:00'); renderMiniCalendar();
+  $('dateRes').innerHTML=`<div class="result"><div class="metric" style="grid-column:1/-1"><span>Result date</span><b>${out}</b></div></div>`;saveHistory('Date '+dateMode,out);
+ }
+}
+
+function setLoanMode(m,b){loanMode=m;document.querySelectorAll('#loan .seg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.morOnly').forEach(x=>x.classList.toggle('hide',m==='emi'))}
+function emi(p,r,n){r/=1200;return r? p*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):p/n}
+function calcLoan(){
+ let p=Number($('la').value),r=Number($('lr').value),n=Math.round(Number($('ly').value)*12);
+ if(p<=0||r<0||n<=0){toast('Enter valid loan details');return}
+ if(loanMode==='emi'){
+  let e=emi(p,r,n),interest=e*n-p;
+  $('loanRes').innerHTML=`<div class="result"><div class="metric"><span>Monthly EMI</span><b>${money(e)}</b></div><div class="metric"><span>Total interest</span><b>${money(interest)}</b></div><div class="metric"><span>Total payment</span><b>${money(e*n)}</b></div><div class="metric"><span>Tenure</span><b>${n} months</b></div></div>`;
+  drawLoan(p,r,n);saveHistory('Loan EMI',money(e));
+ }else{
+  let m=Math.round(Number($('lm').value)),mr=r/1200;if(m<=0){toast('Enter moratorium months');return}
+  let accrued=p*(Math.pow(1+mr,m)-1),balance=$('li').value==='cap'?p+accrued:p,e=emi(balance,r,n);
+  $('loanRes').innerHTML=`<div class="result"><div class="metric"><span>Moratorium interest</span><b>${money(accrued)}</b></div><div class="metric"><span>Balance after</span><b>${money(balance)}</b></div><div class="metric"><span>Revised EMI</span><b>${money(e)}</b></div><div class="metric"><span>Repayment term</span><b>${n} months</b></div></div>`;
+  $('loanChart').classList.add('hide');saveHistory('Loan Moratorium',money(e));
+ }
+}
+function drawLoan(p,r,n){
+ let c=$('loanChart'),x=c.getContext('2d');c.classList.remove('hide');x.clearRect(0,0,c.width,c.height);
+ let e=emi(p,r,n),bal=p,pts=[];for(let i=0;i<n;i++){let interest=bal*r/1200;bal=Math.max(0,bal-(e-interest));pts.push(bal)}
+ x.beginPath();pts.forEach((v,i)=>{let X=20+i/(pts.length-1||1)*760,Y=315-v/p*280;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();x.fillStyle='#8994a8';x.font='22px system-ui';x.fillText('Loan balance',20,30)
+}
+function setDep(rd,b){isRD=rd;document.querySelectorAll('#deposit .seg button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('depLabel').textContent=rd?'Monthly deposit (₹)':'Deposit (₹)'}
+function calcDeposit(){
+ let A=Number($('da').value),rate=Number($('dr').value)/100,t=Number($('dt').value),u=$('du').value;
+ if(A<=0||rate<0||t<=0){toast('Enter valid deposit details');return}
+ let years=u==='y'?t:u==='m'?t/12:t/365,n=Math.max(1,Math.round(years*12)),fv;
+ if(isRD){
+  let m=rate/12;fv=rate?A*((Math.pow(1+m,n)-1)/m)*(1+m):A*n;let inv=A*n;
+  $('depRes').innerHTML=`<div class="result"><div class="metric"><span>Maturity</span><b>${money(fv)}</b></div><div class="metric"><span>Invested</span><b>${money(inv)}</b></div><div class="metric"><span>Interest</span><b>${money(fv-inv)}</b></div></div>`;saveHistory('RD',money(fv))
+ }else{
+  let q=Number($('dc').value);fv=A*Math.pow(1+rate/q,q*years);
+  $('depRes').innerHTML=`<div class="result"><div class="metric"><span>Maturity</span><b>${money(fv)}</b></div><div class="metric"><span>Principal</span><b>${money(A)}</b></div><div class="metric"><span>Interest</span><b>${money(fv-A)}</b></div></div>`;saveHistory('FD',money(fv))
+ }
+}
+function toggleStep(){$('stepBox').classList.toggle('hide',$('st').value==='none')}
+function calcSIP(){
+ let base=Number($('sa').value),annual=Number($('sr').value)/100,years=Math.round(Number($('sy').value)),type=$('st').value,step=Number($('sv').value);
+ if(base<=0||annual<0||years<=0){toast('Enter valid SIP details');return}
+ let monthly=annual/12,total=0,invested=0,vals=[];
+ for(let y=1;y<=years;y++){
+  let sip=type==='pct'?base*Math.pow(1+step/100,y-1):type==='fixed'?base+step*(y-1):base;
+  for(let m=0;m<12;m++){total=total*(1+monthly)+sip;invested+=sip}vals.push(total)
+ }
+ $('sipRes').innerHTML=`<div class="result"><div class="metric"><span>Future value</span><b>${money(total)}</b></div><div class="metric"><span>Invested</span><b>${money(invested)}</b></div><div class="metric"><span>Estimated gain</span><b>${money(total-invested)}</b></div></div>`;
+ drawSIP(vals);saveHistory('SIP',money(total))
+}
+function drawSIP(vals){let c=$('sipChart'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);let max=Math.max(...vals);x.beginPath();vals.forEach((v,i)=>{let X=20+i/(vals.length-1||1)*760,Y=315-v/max*280;i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();x.fillStyle='#8994a8';x.font='22px system-ui';x.fillText('Portfolio value by year',20,30)}
+
+document.querySelectorAll('.bottomItem').forEach(b=>b.addEventListener('click',()=>{
+  const page=b.dataset.bottom;
+  document.querySelectorAll('.bottomItem').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.querySelectorAll('.option').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  const target=document.getElementById(page);
+  if(target) target.classList.add('active');
+  if(page==='history') renderHistory();
+}));
+
+/* Loan module: Input / Report / Graph / Save */
+let loanModeState='emi';
+let loanResult=null;
+let savedLoans=JSON.parse(localStorage.getItem('count_craze_saved_loans')||'[]');
+let selectedSavedLoanId=Number(localStorage.getItem('count_craze_selected_loan')||0)||null;
+
+function loanEMI(principal, annualRate, months){
+  const r=annualRate/1200;
+  return r ? principal*r*Math.pow(1+r,months)/(Math.pow(1+r,months)-1) : principal/months;
+}
+function getLoanMonths(){
+  const value=Number($('ly').value);
+  return $('loanUnit').value==='m'?Math.round(value):Math.round(value*12);
+}
+function loanValidate(){
+  const p=Number($('la').value), r=Number($('lr').value), n=getLoanMonths();
+  if(!Number.isFinite(p)||p<=0||!Number.isFinite(r)||r<0||!Number.isFinite(n)||n<=0){toast('Enter valid loan details');return null}
+  return {p,r,n};
+}
+function setLoanPane(name){
+  document.querySelectorAll('.loanTab').forEach(b=>b.classList.toggle('active',b.dataset.loantab===name));
+  document.querySelectorAll('.loanPane').forEach(p=>p.classList.remove('active'));
+  const map={input:'loanInput',report:'loanReport',graph:'loanGraph',save:'loanSave'};
+  $(map[name]).classList.add('active');
+  if(name==='graph'&&loanResult) drawLoanGraph(loanResult);
+  if(name==='report') renderLoanReport();
+  if(name==='save') renderSavedLoans();
+}
+document.querySelectorAll('.loanTab').forEach(b=>b.addEventListener('click',()=>setLoanPane(b.dataset.loantab)));
+
+document.querySelectorAll('[data-loanmode]').forEach(b=>b.addEventListener('click',()=>{
+  loanModeState=b.dataset.loanmode;
+  document.querySelectorAll('[data-loanmode]').forEach(x=>x.classList.toggle('active',x.dataset.loanmode===loanModeState));
+  $('morFields').classList.toggle('hide',loanModeState!=='mor');
+  $('loanRes').innerHTML='';
+}));
+
+function calculateLoanNew(){
+  const base=loanValidate();if(!base)return;
+  const {p,r,n}=base;
+  if(loanModeState==='emi'){
+    const e=loanEMI(p,r,n), total=e*n, interest=total-p;
+    loanResult={mode:'emi',p,r,n,emi:e,total,interest,balance:p,morInterest:0};
+  }else{
+    const m=Math.round(Number($('lm').value));
+    if(!Number.isFinite(m)||m<=0){toast('Enter valid moratorium months');return}
+    const monthlyRate=r/1200;
+    const accrued=p*(Math.pow(1+monthlyRate,m)-1);
+    const balance=$('li').value==='cap'?p+accrued:p;
+    const e=loanEMI(balance,r,n);
+    loanResult={mode:'mor',p,r,n,emi:e,total:e*n+(($('li').value==='pay')?accrued:0),interest:e*n-balance+($('li').value==='pay'?accrued:0),balance,morInterest:accrued,morMonths:m,treatment:$('li').value};
+  }
+  renderLoanResult();
+  renderLoanReport();
+  drawLoanGraph(loanResult);
+  saveHistory('Loan '+(loanResult.mode==='emi'?'EMI':'Moratorium'),money(loanResult.emi));
+  toast('Loan calculated');
+}
+function renderLoanResult(){
+  if(!loanResult)return;
+  const x=loanResult;
+  $('loanRes').innerHTML=`<div class="result">
+    <div class="metric"><span>Monthly EMI</span><b>${money(x.emi)}</b></div>
+    <div class="metric"><span>Total Interest</span><b>${money(x.interest)}</b></div>
+    <div class="metric"><span>Total Payment</span><b>${money(x.total)}</b></div>
+    <div class="metric"><span>Term</span><b>${x.n} months</b></div>
+  </div>`;
+}
+function renderLoanReport(){
+  if(!loanResult){$('loanReportContent').innerHTML='<div class="reportEmpty">Calculate a loan to see the full report.</div>';return}
+  const x=loanResult;
+  const mor=x.mode==='mor'?`
+    <div class="reportRow"><span>Moratorium</span><b>${x.morMonths} months</b></div>
+    <div class="reportRow"><span>Moratorium Interest</span><b>${money(x.morInterest)}</b></div>
+    <div class="reportRow"><span>Balance After Moratorium</span><b>${money(x.balance)}</b></div>
+  `:'';
+  $('loanReportContent').innerHTML=`<div class="reportGrid">
+    <div class="reportRow"><span>Loan Amount</span><b>${money(x.p)}</b></div>
+    <div class="reportRow"><span>Annual Rate</span><b>${x.r.toFixed(2)}%</b></div>
+    <div class="reportRow"><span>Loan Term</span><b>${x.n} months</b></div>
+    <div class="reportRow"><span>Monthly EMI</span><b>${money(x.emi)}</b></div>
+    <div class="reportRow"><span>Total Interest</span><b>${money(x.interest)}</b></div>
+    <div class="reportRow"><span>Total Payment</span><b>${money(x.total)}</b></div>${mor}
+  </div>`;
+}
+function drawLoanGraph(x){
+  const c=$('loanChart');if(!c||!x)return;
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  let bal=x.balance, pts=[bal], monthly=x.r/1200, e=x.emi;
+  for(let i=0;i<x.n;i++){const interest=bal*monthly;bal=Math.max(0,bal-(e-interest));pts.push(bal)}
+  const max=Math.max(1,x.p,x.balance), left=35,right=780,top=45,bottom=310;
+  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1976ff';
+  ctx.lineWidth=5;ctx.beginPath();
+  pts.forEach((v,i)=>{const X=left+i/(pts.length-1||1)*(right-left),Y=bottom-(v/max)*(bottom-top);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});
+  ctx.stroke();
+  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#777';
+  ctx.font='22px system-ui';ctx.fillText('Outstanding balance',35,30);
+}
+$('loanCalculate').addEventListener('click',calculateLoanNew);
+$('loanReset').addEventListener('click',()=>{
+  $('la').value=1000000;$('lr').value=8.5;$('ly').value=10;$('loanUnit').value='y';$('lm').value=3;$('li').value='cap';
+  loanResult=null;$('loanRes').innerHTML='';renderLoanReport();toast('Loan reset');
+});
+
+$('saveLoanBtn').addEventListener('click',()=>{
+  if(!loanResult){toast('Calculate a loan first');return}
+  let name=$('loanName').value.trim()||'My Loan';
+  const savedId=Date.now();
+  savedLoans.unshift({id:savedId,name,data:loanResult});
+  selectedSavedLoanId=savedId;
+  localStorage.setItem('count_craze_selected_loan',String(savedId));
+  savedLoans=savedLoans.slice(0,30);
+  localStorage.setItem('count_craze_saved_loans',JSON.stringify(savedLoans));
+  $('loanName').value='';renderSavedLoans();toast('Loan saved');
+});
+function renderSavedLoans(){
+  if(!savedLoans.length){$('savedLoans').innerHTML='<div class="reportEmpty">No saved loans yet.</div>';return}
+  $('savedLoans').innerHTML=savedLoans.map(s=>{
+    const x=s.data;
+    return `<article class="savedLoan">
+      <h3>${escapeHTML(s.name)}</h3>
+      <p><strong>Loan Amount:</strong> ${money(x.p)}</p>
+      <p><strong>Annual Interest Rate:</strong> ${x.r.toFixed(2)}%</p>
+      <p><strong>Loan Term:</strong> ${x.n} Months</p>
+      <p><strong>EMI:</strong> ${money(x.emi)}</p>
+      <div class="savedBtns"><button type="button" data-open="${s.id}">OPEN</button><button type="button" data-share-saved="${s.id}">SHARE</button><button type="button" data-delete="${s.id}">DELETE</button></div>
+    </article>`
+  }).join('');
+  document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{
+    const s=savedLoans.find(x=>x.id===Number(b.dataset.open));if(!s)return;
+    selectedSavedLoanId=s.id;localStorage.setItem('count_craze_selected_loan',String(s.id));
+    const x=s.data;loanResult=x;
+    $('la').value=x.p;$('lr').value=x.r;
+    $('loanUnit').value='m';$('ly').value=x.n;
+    loanModeState=x.mode;
+    document.querySelectorAll('[data-loanmode]').forEach(z=>z.classList.toggle('active',z.dataset.loanmode===loanModeState));
+    $('morFields').classList.toggle('hide',loanModeState!=='mor');
+    if(x.mode==='mor'){$('lm').value=x.morMonths||3;$('li').value=x.treatment||'cap'}
+    renderLoanResultEnhanced();renderLoanReportEnhanced();setLoanPane('input');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('loan').classList.add('active');document.querySelectorAll('.bottomItem').forEach(x=>x.classList.toggle('active',x.dataset.bottom==='loan'));document.querySelectorAll('.option').forEach(x=>x.classList.toggle('active',x.dataset.page==='loan'));toast('Saved loan opened');
+  }));
+  document.querySelectorAll('[data-share-saved]').forEach(b=>b.addEventListener('click',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const id=Number(b.getAttribute('data-share-saved'));
+    const s=savedLoans.find(x=>x.id===id);
+    if(!s){toast('Saved loan not found');return}
+    /* Use the exact same sharing path as the large SHARE LOAN button.
+       This also guarantees the selected saved loan is the one being shared. */
+    selectedSavedLoanId=s.id;
+    localStorage.setItem('count_craze_selected_loan',String(s.id));
+    loanResult=s.data;
+    shareLoan();
+  }));
+  document.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{
+    const deletedId=Number(b.dataset.delete);
+    savedLoans=savedLoans.filter(x=>x.id!==deletedId);
+    if(selectedSavedLoanId===deletedId){selectedSavedLoanId=savedLoans[0]?.id||null;if(selectedSavedLoanId)localStorage.setItem('count_craze_selected_loan',String(selectedSavedLoanId));else localStorage.removeItem('count_craze_selected_loan');}
+    localStorage.setItem('count_craze_saved_loans',JSON.stringify(savedLoans));renderSavedLoans();toast('Saved loan deleted');
+  }));
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+renderSavedLoans();
+
+toggleStep();renderHistory();
+let memory=0, powered=true;
+const themeBtn=$('themeBtn');
+function setTheme(mode){
+  document.documentElement.dataset.theme=mode;
+  document.documentElement.classList.toggle('day-mode',mode!=='dark');
+  document.documentElement.classList.toggle('night-mode',mode==='dark');
+  
+  document.documentElement.dataset.theme=mode;
+  localStorage.setItem('count_craze_theme',mode);
+  const icon=$('themeIcon');if(icon)icon.className='themeIcon '+(mode==='dark'?'sun':'moon');
+  themeBtn.setAttribute('aria-label',mode==='dark'?'Switch to light mode':'Switch to dark mode');
+}
+setTheme(localStorage.getItem('count_craze_theme')||'light');
+themeBtn.addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+
+function updatePowerButton(){
+ const b=$('powerKey');
+ if(!b)return;
+ b.textContent=powered?'ON':'OFF';
+ b.classList.toggle('off',!powered);
+ b.setAttribute('aria-label',powered?'Turn calculator off':'Turn calculator on');
+}
+updatePowerButton();
+
+const originalCalcKey=calcKey;
+calcKey=function(k){
+ if(k==='power'){powered=!powered;expr='';if(!powered)calcHistory='';updatePowerButton();showCalc();toast(powered?'Calculator ON':'Calculator OFF');return}
+ if(k==='CE'){expr='';calcHistory='';justEvaluated=false;showCalc();return}
+ if(k==='gst18'){
+   try{
+     if(!expr || expr==='Error') return;
+     const value=Number(Function('"use strict";return ('+expr+')')());
+     if(!Number.isFinite(value)) throw Error();
+     const withGST=value*1.18;
+     lastAnswer=withGST;
+     calcHistory=expr+' + 18% GST = '+String(Number(withGST.toFixed(10)));
+     saveHistory('GST 18%',calcHistory);
+     expr=String(Number(withGST.toFixed(10)));
+     justEvaluated=true;
+     showCalc();
+   }catch(e){expr='Error';justEvaluated=false;showCalc();setTimeout(()=>{expr='';showCalc()},800)}
+   return;
+ }
+ if(k==='pow'){
+   if(expr==='Error'){expr='';justEvaluated=false}
+   if(justEvaluated){expr=String(lastAnswer);justEvaluated=false}
+   if(!expr || /[+\-*/^(]$/.test(expr)) return;
+   expr+='^';showCalc();return;
+ }
+ if(k==='replay'){
+   if(!replayExpression){toast('No calculation to replay');return}
+   expr=replayExpression;justEvaluated=false;calcKey('=');return;
+ }
+ if(k==='bracket'){
+   if(expr==='Error'){expr='';justEvaluated=false}
+   const last=expr.slice(-1);
+   if(justEvaluated){expr='';calcHistory='';justEvaluated=false}
+   if(!expr || /[+\-*/(]$/.test(expr)) expr+='('; else if((expr.match(/\(/g)||[]).length>(expr.match(/\)/g)||[]).length) expr+=')'; else expr+='*(';
+   showCalc();
+   return;
+ }
+ if(k==='+/-'){if(expr)expr=expr.startsWith('-')?expr.slice(1):'-'+expr;showCalc();return}
+ if(k==='sqrt'){try{let v=Math.sqrt(Number(expr||0));if(!Number.isFinite(v))throw Error();lastAnswer=v;expr=String(Number(v.toFixed(10)));showCalc()}catch(e){expr='Error';showCalc()}return}
+ if(!powered)return;
+ if(k==='ans' && Number.isFinite(lastAnswer)){expr+=String(lastAnswer);showCalc();return}
+ originalCalcKey(k);
+};
+
+</script>
+
+<script>
+/* Naini Calcinator - corrected loan moratorium + amortization module */
+(function(){
+  function loanCalcEnhanced(){
+    const p=Number($('la').value), r=Number($('lr').value), n=getLoanMonths();
+    if(!Number.isFinite(p)||p<=0||!Number.isFinite(r)||r<0||!Number.isFinite(n)||n<=0){toast('Enter valid loan details');return}
+    if(loanModeState==='emi'){
+      const e=loanEMI(p,r,n), total=e*n;
+      loanResult={mode:'emi',p,r,n,emi:e,total,interest:total-p,balance:p,morInterest:0,treatment:'none',morMonths:0};
+    }else{
+      const m=Math.round(Number($('lm').value));
+      if(!Number.isFinite(m)||m<1){toast('Enter valid moratorium months');return}
+      if(m>=n){toast('Moratorium must be shorter than the loan term');return}
+      const mr=r/1200;
+      const accrued=r===0?0:p*(Math.pow(1+mr,m)-1);
+      const pays=$('li').value==='pay';
+      const postBalance=pays?p:p+accrued;
+      const postMonths=n-m;
+      const e=loanEMI(postBalance,r,postMonths);
+      const repaymentInterest=e*postMonths-postBalance;
+      const totalInterest=repaymentInterest+(pays?accrued:accrued);
+      const totalPayment=postBalance+repaymentInterest+(pays?accrued:0);
+      loanResult={
+        mode:'mor',p,r,n,emi:e,total:totalPayment,interest:totalInterest,
+        balance:postBalance,morInterest:accrued,morMonths:m,
+        treatment:pays?'pay':'cap',postMonths
+      };
+    }
+    renderLoanResultCorrect();
+    renderLoanReportCorrect();
+    renderAmortizationCorrect();
+    drawLoanGraphCorrect(loanResult);
+    toast('Loan calculated');
+  }
+
+  function renderLoanResultCorrect(){
+    const x=loanResult;
+    let mor='';
+    if(x.mode==='mor'){
+      mor=`<div class="metric"><span>Moratorium Interest</span><b>${money(x.morInterest)}</b></div>
+      <div class="metric"><span>Interest Paid During Moratorium</span><b>${x.treatment==='pay'?money(x.morInterest):'₹ 0.00'}</b></div>
+      <div class="metric"><span>EMI After Moratorium</span><b>${money(x.emi)}</b></div>
+      <div class="metric"><span>Balance After Moratorium</span><b>${money(x.balance)}</b></div>`;
+    }
+    $('loanRes').innerHTML=`<div class="result">
+      ${x.mode==='emi'?`<div class="metric"><span>Monthly EMI</span><b>${money(x.emi)}</b></div>`:''}
+      <div class="metric"><span>Total Interest</span><b>${money(x.interest)}</b></div>
+      <div class="metric"><span>Total Payment</span><b>${money(x.total)}</b></div>
+      <div class="metric"><span>Repayment Term</span><b>${x.mode==='mor'?x.postMonths:x.n} months</b></div>${mor}
+    </div>`;
+  }
+
+  async function shareLoan(){
+    const selected=savedLoans.find(x=>x.id===selectedSavedLoanId);
+    if(selected){shareLoanData(selected.data,selected.name);return}
+    if(!loanResult){toast('Save or calculate a loan first');return}
+    shareLoanData(loanResult,'Current Loan');
+  }
+
+  async function shareLoanData(x,loanName){
+    if(!x){toast('No saved loan selected');return}
+    const canvas=document.createElement('canvas');
+    const ctx=canvas.getContext('2d');
+    const W=1000,H=(x.mode==='mor'?720:590)+(loanName?34:0);
+    canvas.width=W;canvas.height=H;
+    const root=getComputedStyle(document.documentElement);
+    const bg=root.getPropertyValue('--panel').trim()||'#ffffff';
+    const textColor=root.getPropertyValue('--text').trim()||'#10141b';
+    const muted=root.getPropertyValue('--muted').trim()||'#667181';
+    const accent=root.getPropertyValue('--accent').trim()||'#1976ff';
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=accent;ctx.fillRect(0,0,W,14);
+    ctx.fillStyle=textColor;ctx.font='800 42px system-ui';ctx.fillText('Naini Calcinator',55,70);
+    ctx.font='800 30px system-ui';ctx.fillText('Loan Summary',55,115);
+    ctx.font='600 17px system-ui';ctx.fillStyle=muted;ctx.fillText(String(loanName||'Saved Loan').slice(0,45),55,170);
+    ctx.font='500 18px system-ui';ctx.fillStyle=muted;ctx.fillText(x.mode==='mor'?'Loan + Moratorium':'EMI - Basic',55,145);
+    const rows=[
+      ['Loan Amount',money(x.p)],['Annual Interest Rate',x.r.toFixed(2)+'%'],
+      ['Original Term',x.n+' months'],['Monthly EMI',money(x.emi)],
+      ['Total Interest',money(x.interest)],['Total Payment',money(x.total)]
+    ];
+    if(x.mode==='mor'){
+      rows.push(['Moratorium',x.morMonths+' months']);
+      rows.push(['Interest Treatment',x.treatment==='pay'?'Paid separately':'Added to principal']);
+      rows.push(['Balance After Moratorium',money(x.balance)]);
+    }
+    let y=215;
+    rows.forEach((r,i)=>{
+      if(i%2===0){ctx.fillStyle=root.getPropertyValue('--panel2').trim()||'#eef1f4';ctx.fillRect(45,y-27,W-90,58)}
+      ctx.fillStyle=muted;ctx.font='600 19px system-ui';ctx.fillText(r[0],70,y+2);
+      ctx.fillStyle=textColor;ctx.font='800 20px system-ui';ctx.textAlign='right';ctx.fillText(r[1],W-70,y+2);ctx.textAlign='left';
+      y+=58;
+    });
+    ctx.fillStyle=muted;ctx.font='500 15px system-ui';ctx.fillText('Generated by Naini Calcinator',55,H-28);
+    canvas.toBlob(async blob=>{
+      if(!blob){toast('Could not create loan image');return}
+      const safeName=String(loanName||'Saved Loan').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40)||'saved-loan';
+      const file=new File([blob],safeName+'-loan.png',{type:'image/png'});
+      const name=String(loanName||'Saved Loan');
+      const shareText=[
+        'Naini Calcinator - '+name,
+        'Loan Amount: '+money(x.p),
+        'Annual Interest Rate: '+x.r.toFixed(2)+'%',
+        'Loan Term: '+x.n+' months',
+        'Monthly EMI: '+money(x.emi),
+        'Total Interest: '+money(x.interest),
+        'Total Payment: '+money(x.total)
+      ].join('\n');
+      try{
+        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+          await navigator.share({title:'Naini Calcinator - '+name,text:shareText,files:[file]});
+          toast('Saved loan shared');
+          return;
+        }
+      }catch(e){
+        if(e && e.name==='AbortError')return;
+      }
+      /* AppsGeyser/WebView often blocks file attachments. Try a normal Android share
+         with the saved loan details before falling back to the screenshot image. */
+      try{
+        if(navigator.share){
+          await navigator.share({title:'Naini Calcinator - '+name,text:shareText});
+          toast('Saved loan shared');
+          return;
+        }
+      }catch(e){
+        if(e && e.name==='AbortError')return;
+      }
+      showLoanShareImage(blob);
+      toast('Loan image opened — press and hold to share');
+    },'image/png');
+  }
+
+  function showLoanShareImageFromSaved(x,name){
+    /* Unexpected-error safety path: shareLoanData normally creates the image. */
+    if(x)shareLoanData(x,name);
+  }
+
+  function showLoanShareImage(blob){
+    const oldUrl=$('loanShareImage').dataset.blobUrl;
+    if(oldUrl)URL.revokeObjectURL(oldUrl);
+    const url=URL.createObjectURL(blob);
+    $('loanShareImage').src=url;
+    $('loanShareImage').dataset.blobUrl=url;
+    $('loanShareModal').classList.add('open');
+    $('loanShareClose').focus();
+  }
+
+  function renderLoanReportCorrect(){
+    if(!loanResult){$('loanReportContent').innerHTML='<div class="reportEmpty">Calculate a loan to see the full report.</div>';return}
+    const x=loanResult;
+    const mor=x.mode==='mor'?`
+      <div class="reportRow"><span>Moratorium Period</span><b>${x.morMonths} months</b></div>
+      <div class="reportRow"><span>Interest Accrued During Moratorium</span><b>${money(x.morInterest)}</b></div>
+      <div class="reportRow"><span>Interest To Pay During Moratorium</span><b>${x.treatment==='pay'?money(x.morInterest):'₹ 0.00'}</b></div>
+      <div class="reportRow"><span>Interest Treatment</span><b>${x.treatment==='pay'?'Paid separately':'Added to principal'}</b></div>
+      <div class="reportRow"><span>Principal/Balance After Moratorium</span><b>${money(x.balance)}</b></div>
+      <div class="reportRow"><span>EMI After Moratorium</span><b>${money(x.emi)}</b></div>
+      <div class="reportRow"><span>Remaining EMI Period</span><b>${x.postMonths} months</b></div>`:'';
+    $('loanReportContent').innerHTML=`<div class="reportGrid">
+      <div class="reportRow"><span>Loan Amount</span><b>${money(x.p)}</b></div>
+      <div class="reportRow"><span>Annual Rate</span><b>${x.r.toFixed(2)}%</b></div>
+      <div class="reportRow"><span>Original Term</span><b>${x.n} months</b></div>
+      ${x.mode==='emi'?`<div class="reportRow"><span>Monthly EMI</span><b>${money(x.emi)}</b></div>`:''}
+      <div class="reportRow"><span>Total Interest</span><b>${money(x.interest)}</b></div>
+      <div class="reportRow"><span>Total Payment</span><b>${money(x.total)}</b></div>${mor}
+    </div>`;
+  }
+
+  function amortRows(x){
+    const rows=[];
+    let bal=x.p;
+    const mr=x.r/1200;
+    if(x.mode==='mor'){
+      for(let i=1;i<=x.morMonths;i++){
+        const interest=bal*mr;
+        const end=x.treatment==='cap'?bal+interest:bal;
+        rows.push({period:i,label:'Moratorium',emi:x.treatment==='pay'?interest:0,principal:0,interest,balance:end,paidInterest:x.treatment==='pay'?interest:0});
+        bal=end;
+      }
+      for(let j=1;j<=x.postMonths && bal>0.005;j++){
+        const interest=bal*mr;
+        const principal=Math.min(bal,Math.max(0,x.emi-interest));
+        const pay=principal+interest;
+        bal=Math.max(0,bal-principal);
+        rows.push({period:x.morMonths+j,label:'EMI',emi:pay,principal,interest,balance:bal,paidInterest:0});
+      }
+    }else{
+      for(let j=1;j<=x.n && bal>0.005;j++){
+        const interest=bal*mr;
+        const principal=Math.min(bal,Math.max(0,x.emi-interest));
+        const pay=principal+interest;
+        bal=Math.max(0,bal-principal);
+        rows.push({period:j,label:'EMI',emi:pay,principal,interest,balance:bal,paidInterest:0});
+      }
+    }
+    return rows;
+  }
+
+  function renderAmortizationCorrect(){
+    const section=$('amortSection');
+    if(!loanResult || !$('showAmort').checked){section.classList.add('hide');return}
+    section.classList.remove('hide');
+    const rows=amortRows(loanResult);
+    $('amortBody').innerHTML=rows.map(x=>`<tr>
+      <td>${x.period}</td><td>${x.label}</td><td>${money(x.emi)}</td><td>${money(x.principal)}</td><td>${money(x.interest)}</td><td>${money(x.balance)}</td>
+    </tr>`).join('');
+  }
+
+  function drawLoanGraphCorrect(x){
+    const c=$('loanChart');if(!c||!x)return;
+    const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+    const rows=amortRows(x), vals=[x.p].concat(rows.map(r=>r.balance));
+    const max=Math.max(1,...vals), L=35,R=780,T=45,B=310;
+    ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1976ff';
+    ctx.lineWidth=5;ctx.beginPath();
+    vals.forEach((v,i)=>{const X=L+i/(vals.length-1||1)*(R-L),Y=B-(v/max)*(B-T);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});
+    ctx.stroke();
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#777';
+    ctx.font='22px system-ui';ctx.fillText('Outstanding balance',35,30);
+  }
+
+  try{$('loanCalculate').removeEventListener('click',calculateLoanNew)}catch(e){}
+  $('shareLoanBtn').addEventListener('click',shareLoan);
+  $('loanShareClose').addEventListener('click',()=>{
+    const url=$('loanShareImage').dataset.blobUrl;
+    if(url)URL.revokeObjectURL(url);
+    $('loanShareImage').removeAttribute('src');
+    delete $('loanShareImage').dataset.blobUrl;
+    $('loanShareModal').classList.remove('open');
+  });
+  $('loanShareModal').addEventListener('click',e=>{ if(e.target.id==='loanShareModal') $('loanShareClose').click(); });
+  $('loanCalculate').addEventListener('click',loanCalcEnhanced);
+  $('showAmort').addEventListener('change',renderAmortizationCorrect);
+
+  /* Make the moratorium choice explicit in the UI. */
+  $('li').addEventListener('change',()=>{
+    const hint=$('morInterestHint');
+    if(hint) hint.textContent=$('li').value==='pay'
+      ? 'Interest accrued during the moratorium will be paid separately. EMI starts after the moratorium.'
+      : 'Interest accrued during the moratorium is added to the loan balance. The revised EMI starts after the moratorium.';
+  });
+
+  /* Add a visible explanation under the treatment selector. */
+  const treatment=$('li');
+  if(treatment && !document.getElementById('morInterestHint')){
+    const h=document.createElement('div');
+    h.id='morInterestHint';
+    h.style.cssText='color:var(--muted);font-size:11px;line-height:1.45;margin-top:6px';
+    treatment.parentNode.appendChild(h);
+    h.textContent='Interest accrued during the moratorium is added to the loan balance. The revised EMI starts after the moratorium.';
+  }
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body>
+</html>
